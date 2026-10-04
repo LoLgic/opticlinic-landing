@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "chart.js": "^4.4.4",
+    "react-chartjs-2": "^5.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

@@ -1,10 +1,16 @@
-# OptiClinic – Landing
+# OptiClinic
 
-Vite + React 18 + TypeScript + Tailwind CSS. Tema claro/oscuro con variables CSS (`src/index.css`).
+Frontend: Vite + React + TypeScript + Tailwind + Chart.js · Backend: FastAPI + SciPy (HiGHS).
 
+## Backend (terminal 1)
+    cd backend
+    python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+    pip install -r requirements.txt
+    uvicorn app.main:app --reload --port 8000           # docs: http://localhost:8000/docs
+    pytest                                              # pruebas del solver
+
+## Frontend (terminal 2)
     npm install
-    npm run dev      # http://localhost:5173
-    npm run build
+    npm run dev                                         # http://localhost:5173  (/api -> :8000)
 
-Contenido editable en `src/data.ts`. El cálculo del simulador es de demostración
-(`src/components/Simulator.tsx`, marcado con TODO): se reemplaza por `POST /api/v1/optimize` (FastAPI, proxy en `vite.config.ts`).
+Producción: define `VITE_API_URL` (frontend) y `CORS_ORIGINS` (backend).

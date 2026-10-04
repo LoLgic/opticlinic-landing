@@ -20,8 +20,11 @@ export const ACTIVITIES = [
   { id: "analisis", icon: "📈", name: "Análisis de información", short: "Análisis", demand: null, pct: 55, lead: "Kimi K3" },
 ];
 
-// Costos y productividad por tarea (USD) — placeholders hasta conectar la API
-export const DEMO = { cost: { gpt: 0.8, kimi: 0.4 }, prod: { gpt: 1.0, kimi: 0.9 } };
+// Valores por defecto del escenario académico (editables en el simulador)
+export const DEFAULT_COST = { gpt: 0.8, kimi: 0.4 }; // USD por tarea
+export const DEFAULT_PROD: Record<string, [number, number]> = { // productividad por tarea [GPT-5.5, Kimi K3]
+  consultas: [1.0, 0.7], mensajes: [0.9, 0.8], citas: [0.8, 0.85], bd: [0.7, 1.0], registros: [0.75, 0.95], reportes: [0.85, 0.8],
+};
 
 export const PROBLEM_CHIPS = ["Consultas de pacientes", "Mensajes", "Agendamiento de citas", "Organización de bases de datos", "Clasificación de registros", "Generación de reportes", "Análisis de información"];
 export const PROBLEM_STEPS = [
