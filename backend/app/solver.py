@@ -28,15 +28,16 @@ class Scenario:
     capacity: tuple[float, float]
 
 
-def solve(s: Scenario) -> dict:
+def _lp(s: Scenario, budget: float | None, minimize_cost: bool = False):
+    """Resuelve el LP. budget=None elimina la restricción de presupuesto."""
     n = len(s.activities)
-    # Orden de variables: [x_00, x_01, x_10, x_11, ...]
     p = np.array([v for a in s.activities for v in a.prod], dtype=float)
     c = np.array([v for a in s.activities for v in a.cost], dtype=float)
 
-    # linprog minimiza -> negamos la productividad
-    A_ub = [c]
-    b_ub = [s.budget]
+    A_ub, b_ub = [], []
+    if budget is not None:
+        A_ub.append(c)
+        b_ub.append(budget)
     for j in (0, 1):
         row = np.zeros(2 * n)
         row[j::2] = 1
@@ -50,9 +51,35 @@ def solve(s: Scenario) -> dict:
         A_eq.append(row)
         b_eq.append(a.demand)
 
-    res = linprog(-p, A_ub=np.array(A_ub), b_ub=b_ub, A_eq=np.array(A_eq), b_eq=b_eq,
-                  bounds=(0, None), method="highs")
+    obj = c if minimize_cost else -p  # linprog minimiza -> negamos la productividad
+    return linprog(obj, A_ub=np.array(A_ub), b_ub=b_ub, A_eq=np.array(A_eq), b_eq=b_eq,
+                   bounds=(0, None), method="highs"), c
 
+
+def sensitivity(s: Scenario, res) -> dict:
+    """Precios sombra (dual de HiGHS), holguras y curva productividad vs presupuesto."""
+    gain = lambda m: max(0.0, float(-m))  # derivada de Z respecto al lado derecho
+    marg, slack = res.ineqlin.marginals, res.ineqlin.residual
+    shadow = {"budget": gain(marg[0]), "capacity_gpt": gain(marg[1]), "capacity_kimi": gain(marg[2])}
+    slacks = {"budget": float(slack[0]), "capacity_gpt": float(slack[1]), "capacity_kimi": float(slack[2])}
+
+    min_res, _ = _lp(s, None, minimize_cost=True)
+    free_res, c = _lp(s, None)  # óptimo sin límite de presupuesto
+    lo = float(min_res.fun) if min_res.status == 0 else s.budget
+    hi = float(c @ free_res.x) if free_res.status == 0 else s.budget
+    pts = set(np.linspace(lo, max(hi, lo) * 1.1, 11).round(2)) | {round(s.budget, 2)}
+    curve = []
+    for b in sorted(pts):
+        r, _ = _lp(s, b)
+        if r.status == 0:
+            curve.append({"budget": float(b), "productivity": float(-r.fun)})
+    return {"shadow": shadow, "slack": slacks, "curve": curve,
+            "min_budget": lo, "saturation_budget": max(hi, lo), "current_budget": s.budget}
+
+
+def solve(s: Scenario) -> dict:
+    n = len(s.activities)
+    res, _ = _lp(s, s.budget)
     if res.status != 0:
         reason = {2: "Escenario infactible: el presupuesto o la capacidad no alcanzan para cubrir la demanda.",
                   3: "Problema no acotado."}.get(res.status, res.message)
@@ -89,4 +116,5 @@ def solve(s: Scenario) -> dict:
             "kimi": {"used": kimi_total, "available": s.capacity[1]},
         },
         "budget": s.budget,
+        "sensitivity": sensitivity(s, res),
     }

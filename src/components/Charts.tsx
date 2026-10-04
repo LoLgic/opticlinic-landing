@@ -45,3 +45,16 @@ export function CapacityChart({ r }: { r: OptimizeResult }) {
         { label: "Disponible", data: [c.gpt.available - c.gpt.used, c.kimi.available - c.kimi.used], backgroundColor: "rgba(138,155,181,.25)", borderRadius: 4 }] }} />
   );
 }
+
+export function SensitivityChart({ r }: { r: OptimizeResult }) {
+  const s = r.sensitivity!;
+  const cur = s.curve.findIndex((p) => Math.abs(p.budget - s.current_budget) < 0.01);
+  return (
+    <Chart type="line" options={{ maintainAspectRatio: false, interaction: { mode: "index", intersect: false },
+      scales: { x: { grid: { display: false }, title: { display: true, text: "Presupuesto (USD)" } }, y: { title: { display: true, text: "Productividad total" }, ticks: { callback: (v) => n(Number(v)) } } },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `Productividad: ${n(c.raw as number)}` } } } }}
+      data={{ labels: s.curve.map((p) => `$${n(p.budget)}`), datasets: [{ type: "line", label: "Productividad", data: s.curve.map((p) => p.productivity),
+        borderColor: BLUE, backgroundColor: BLUE, borderWidth: 2, tension: 0.25,
+        pointRadius: s.curve.map((_, i) => (i === cur ? 7 : 3)), pointBackgroundColor: s.curve.map((_, i) => (i === cur ? ORANGE : BLUE)) }] }} />
+  );
+}

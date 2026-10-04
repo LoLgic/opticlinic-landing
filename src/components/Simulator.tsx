@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { optimize, type OptimizeResult } from "../api";
 import { ACTIVITIES, DEFAULT_BUDGET, DEFAULT_CAPACITY, DEFAULT_PROD, PRICES, STAGES, taskCost } from "../data";
-import { CapacityChart, CostChart, DistributionChart } from "./Charts";
+import { CapacityChart, CostChart, DistributionChart, SensitivityChart } from "./Charts";
 import { Demo, Head } from "./ui";
 
 const fmt = (n: number) => Math.round(n).toLocaleString("es-CO");
@@ -129,6 +129,27 @@ export default function Simulator() {
               <div className="card"><h3 className="mb-4 text-sm font-bold">Capacidad utilizada</h3><div className="relative h-[140px]"><CapacityChart r={ok} /></div>
                 <p className="mt-3 text-[11px] text-muted">GPT-5.5 · {Math.round((ok.capacity!.gpt.used / ok.capacity!.gpt.available) * 100)}% usada · Kimi K3 · {Math.round((ok.capacity!.kimi.used / ok.capacity!.kimi.available) * 100)}% usada</p></div>
             </div>
+            {ok.sensitivity && (() => {
+              const se = ok.sensitivity!, sh = se.shadow, sl = se.slack;
+              const items = [
+                sh.budget > 1e-9 ? `Presupuesto agotado: cada USD adicional aumenta la productividad en ${sh.budget.toFixed(2)} unidades (+100 USD ≈ +${fmt(sh.budget * 100)}).`
+                  : `El presupuesto no limita la solución: sobran ${usd(sl.budget)}.`,
+                sh.capacity_gpt > 1e-9 ? `La capacidad de GPT-5.5 es una restricción activa: cada tarea adicional suma ${sh.capacity_gpt.toFixed(3)} de productividad.`
+                  : `Capacidad de GPT-5.5 con holgura de ${fmt(sl.capacity_gpt)} tareas: ampliarla no mejora el resultado.`,
+                sh.capacity_kimi > 1e-9 ? `La capacidad de Kimi K3 es una restricción activa: cada tarea adicional suma ${sh.capacity_kimi.toFixed(3)} de productividad.`
+                  : `Capacidad de Kimi K3 con holgura de ${fmt(sl.capacity_kimi)} tareas: ampliarla no mejora el resultado.`,
+                se.current_budget >= se.saturation_budget - 0.01 ? "El presupuesto ya alcanzó el punto de saturación: más dinero no aumenta la productividad."
+                  : `Hasta ${usd(se.saturation_budget)} de presupuesto la productividad sigue creciendo; después se estabiliza.`,
+              ];
+              return (
+                <div className="card mt-5 grid gap-6 lg:grid-cols-[1fr_1.3fr]">
+                  <div><h3 className="text-sm font-bold">Análisis de sensibilidad</h3>
+                    <p className="mt-1 text-xs text-muted">Precios sombra y holguras del solver: qué restricción limita el resultado y cuánto vale relajarla.</p>
+                    <ul className="mt-4 list-disc space-y-3 pl-5 text-sm">{items.map((t) => <li key={t}>{t}</li>)}</ul></div>
+                  <div><p className="mb-2 text-xs font-bold text-muted">Productividad óptima según el presupuesto (punto naranja = escenario actual)</p>
+                    <div className="relative h-[280px]"><SensitivityChart r={ok} /></div></div>
+                </div>);
+            })()}
             <div className="card mt-5 overflow-x-auto !p-0">
               <table className="w-full min-w-[560px] text-left text-sm">
                 <thead className="text-xs text-muted"><tr>{["Actividad", "GPT-5.5", "Kimi K3", "Demanda", "Costo"].map((h) => <th key={h} className="px-5 py-4 font-bold">{h}</th>)}</tr></thead>

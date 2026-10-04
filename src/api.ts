@@ -5,6 +5,13 @@ export interface OptimizeResult {
   totals?: { cost: number; productivity: number; demand_covered_pct: number; budget_remaining: number; gpt: number; kimi: number; cost_gpt: number; cost_kimi: number };
   capacity?: { gpt: { used: number; available: number }; kimi: { used: number; available: number } };
   budget?: number;
+  sensitivity?: Sensitivity;
+}
+export interface Sensitivity {
+  shadow: { budget: number; capacity_gpt: number; capacity_kimi: number };   // Δ productividad por unidad extra
+  slack: { budget: number; capacity_gpt: number; capacity_kimi: number };    // holgura sin usar
+  curve: { budget: number; productivity: number }[];
+  min_budget: number; saturation_budget: number; current_budget: number;
 }
 export interface OptimizeRequest {
   activities: { id: string; demand: number; prod_gpt: number; prod_kimi: number; cost_gpt: number; cost_kimi: number }[];
