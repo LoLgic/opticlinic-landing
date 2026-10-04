@@ -2,13 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg: 255 255 255; --surface: 244 248 252; --card: 255 255 255; --chip: 236 241 249; --line: 226 232 240;
+  --ink: 11 27 58; --muted: 91 107 130; --brand: 11 78 162; --cyan: 6 168 204; --ok: 18 161 80; --warn: 245 124 0;
+}
+:root.dark {
+  --bg: 8 15 30; --surface: 11 22 41; --card: 15 28 52; --chip: 22 38 68; --line: 32 48 76;
+  --ink: 232 238 248; --muted: 148 163 184; --brand: 59 130 246; --cyan: 34 190 222;
+}
 html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
-body { @apply font-sans text-navy bg-white antialiased; }
+body { @apply font-sans text-ink bg-bg antialiased; }
 
 @layer components {
-  .btn { @apply inline-flex items-center justify-center rounded-lg px-5 py-3 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2; }
-  .btn-primary { @apply bg-brand text-white hover:bg-brand-dark; }
-  .btn-secondary { @apply border border-slate-200 bg-white text-brand hover:bg-surface; }
-  .section { @apply mx-auto max-w-7xl px-6 py-24; }
-  .eyebrow { @apply text-xs font-semibold uppercase tracking-wider text-brand; }
+  .btn { @apply inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-bg; }
+  .btn-primary { @apply bg-brand text-white hover:opacity-90; }
+  .btn-secondary { @apply border border-line bg-card text-brand hover:bg-chip; }
+  .section { @apply mx-auto max-w-7xl px-6 py-20; }
+  .card { @apply rounded-2xl border border-line bg-card p-5; }
+  .tag { @apply inline-block rounded-xl bg-chip px-4 py-2 text-[11px] font-bold uppercase tracking-wide text-brand; }
+  .callout { @apply rounded-xl bg-chip px-5 py-4 text-sm font-semibold text-brand; }
+  .num { @apply text-2xl font-extrabold text-cyan2; }
+  .input { @apply w-full rounded-xl border border-line bg-card px-3 py-3 text-sm font-semibold text-ink outline-none focus:border-brand focus:ring-1 focus:ring-brand; }
 }

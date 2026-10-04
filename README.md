@@ -1,10 +1,10 @@
 # OptiClinic – Landing
 
-Stack: Vite + React 18 + TypeScript + Tailwind CSS.
+Vite + React 18 + TypeScript + Tailwind CSS. Tema claro/oscuro con variables CSS (`src/index.css`).
 
-```bash
-npm install
-npm run dev      # http://localhost:5173
-npm run build    # build de producción en /dist
-```
-Las llamadas a `/api` se proxean a FastAPI (`localhost:8000`).
+    npm install
+    npm run dev      # http://localhost:5173
+    npm run build
+
+Contenido editable en `src/data.ts`. El cálculo del simulador es de demostración
+(`src/components/Simulator.tsx`, marcado con TODO): se reemplaza por `POST /api/v1/optimize` (FastAPI, proxy en `vite.config.ts`).
