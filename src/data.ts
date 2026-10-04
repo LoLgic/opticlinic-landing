@@ -17,14 +17,41 @@ export const ACTIVITIES = [
   { id: "bd", icon: "🗄️", name: "Organización de bases de datos", short: "Bases de datos", demand: 6000, pct: 35, lead: "Kimi K3" },
   { id: "registros", icon: "🗂️", name: "Clasificación de registros", short: "Registros", demand: 5000, pct: 40, lead: "Kimi K3" },
   { id: "reportes", icon: "📄", name: "Generación de reportes", short: "Reportes", demand: 2500, pct: 45, lead: "Mixta" },
-  { id: "analisis", icon: "📈", name: "Análisis de información", short: "Análisis", demand: null, pct: 55, lead: "Kimi K3" },
+  { id: "analisis", icon: "📈", name: "Análisis de información", short: "Análisis", demand: 3000, pct: 55, lead: "Kimi K3" },
 ];
 
-// Valores por defecto del escenario académico (editables en el simulador)
-export const DEFAULT_COST = { gpt: 0.8, kimi: 0.4 }; // USD por tarea
-export const DEFAULT_PROD: Record<string, [number, number]> = { // productividad por tarea [GPT-5.5, Kimi K3]
-  consultas: [1.0, 0.7], mensajes: [0.9, 0.8], citas: [0.8, 0.85], bd: [0.7, 1.0], registros: [0.75, 0.95], reportes: [0.85, 0.8],
+// ───────── Supuestos del escenario académico (se documentan en la sección Metodología) ─────────
+// Precios de lista en USD por millón de tokens (verificar en las páginas oficiales de OpenAI y Moonshot).
+export const PRICES = { gpt: { in: 5, out: 30 }, kimi: { in: 3, out: 15 } };
+export type Prices = typeof PRICES;
+// Los tokens de razonamiento de Kimi K3 se facturan como salida: se asume 1,5x los tokens de salida visibles.
+export const KIMI_OUT_FACTOR = 1.5;
+// Tokens estimados por tarea [entrada, salida]
+export const TOKENS: Record<string, [number, number]> = {
+  consultas: [1200, 400], mensajes: [600, 200], citas: [500, 150], bd: [3000, 1000],
+  registros: [1500, 100], reportes: [4000, 1500], analisis: [6000, 1500],
 };
+export function taskCost(id: string, p: Prices): [number, number] {
+  const [ti, to] = TOKENS[id];
+  return [(ti * p.gpt.in + to * p.gpt.out) / 1e6, (ti * p.kimi.in + to * KIMI_OUT_FACTOR * p.kimi.out) / 1e6];
+}
+// Productividad por tarea [GPT-5.5, Kimi K3]: calidad esperada en escala 0–1 (supuesto razonado, no medido)
+export const DEFAULT_PROD: Record<string, [number, number]> = {
+  consultas: [0.95, 0.85], mensajes: [0.92, 0.85], citas: [0.9, 0.88], bd: [0.85, 0.92],
+  registros: [0.88, 0.92], reportes: [0.9, 0.88], analisis: [0.88, 0.92],
+};
+export const RATIONALE: Record<string, string> = {
+  consultas: "Trato con el paciente: se asume mejor matiz conversacional y seguridad en GPT-5.5.",
+  mensajes: "Respuestas cortas y empáticas: ventaja moderada de GPT-5.5.",
+  citas: "Tarea simple y estructurada: ambos modelos rinden casi igual.",
+  bd: "Textos largos y datos tabulares: se asume ventaja de Kimi K3 (contexto de 1M tokens y menor costo).",
+  registros: "Clasificación repetitiva de alto volumen: Kimi K3 con calidad similar y menor costo.",
+  reportes: "Redacción formal: rendimiento parecido, ligera ventaja de GPT-5.5.",
+  analisis: "Análisis de grandes volúmenes de información: se asume ventaja de Kimi K3 por contexto largo.",
+};
+export const DEFAULT_BUDGET = 800;       // USD/mes (hipotético)
+export const DEFAULT_CAPACITY = { gpt: 24000, kimi: 26000 }; // tareas/mes (hipotético)
+export const avgProd = (j: 0 | 1) => Object.values(DEFAULT_PROD).reduce((s, p) => s + p[j], 0) / Object.keys(DEFAULT_PROD).length;
 
 export const PROBLEM_CHIPS = ["Consultas de pacientes", "Mensajes", "Agendamiento de citas", "Organización de bases de datos", "Clasificación de registros", "Generación de reportes", "Análisis de información"];
 export const PROBLEM_STEPS = [

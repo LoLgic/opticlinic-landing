@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { optimize, type OptimizeResult } from "../api";
-import { ACTIVITIES, DEFAULT_COST, DEFAULT_PROD, STAGES } from "../data";
+import { ACTIVITIES, DEFAULT_BUDGET, DEFAULT_CAPACITY, DEFAULT_PROD, PRICES, STAGES, taskCost } from "../data";
 import { CapacityChart, CostChart, DistributionChart } from "./Charts";
 import { Demo, Head } from "./ui";
 
@@ -14,9 +14,9 @@ const LAST = STAGES.length; // 6 = completado
 export default function Simulator() {
   const acts = ACTIVITIES.filter((a) => a.demand);
   const [demand, setDemand] = useState<Record<string, number>>(Object.fromEntries(acts.map((a) => [a.id, a.demand!])));
-  const [budget, setBudget] = useState(25000);
-  const [cap, setCap] = useState({ gpt: 24000, kimi: 26000 });
-  const [cost, setCost] = useState(DEFAULT_COST);
+  const [budget, setBudget] = useState(DEFAULT_BUDGET);
+  const [cap, setCap] = useState(DEFAULT_CAPACITY);
+  const [prices, setPrices] = useState(PRICES);
   const [prod, setProd] = useState<Record<string, [number, number]>>(DEFAULT_PROD);
   const [sel, setSel] = useState(acts[0].id);
   const [stage, setStage] = useState(-1); // -1 inactivo · 0..5 en curso · 6 completado
@@ -39,7 +39,7 @@ export default function Simulator() {
     setResult(null); setError(null); setStage(0);
     try {
       const r = await optimize({
-        activities: acts.map((a) => ({ id: a.id, demand: demand[a.id], prod_gpt: prod[a.id][0], prod_kimi: prod[a.id][1], cost_gpt: cost.gpt, cost_kimi: cost.kimi })),
+        activities: acts.map((a) => ({ id: a.id, demand: demand[a.id], prod_gpt: prod[a.id][0], prod_kimi: prod[a.id][1], cost_gpt: taskCost(a.id, prices)[0], cost_kimi: taskCost(a.id, prices)[1] })),
         budget, capacity_gpt: cap.gpt, capacity_kimi: cap.kimi,
       }, abort.current.signal);
       setResult(r);
@@ -73,10 +73,11 @@ export default function Simulator() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="text-xs text-muted">GPT-5.5 (tareas)<input className="input mt-1" inputMode="numeric" value={fmt(cap.gpt)} onChange={(e) => setCap({ ...cap, gpt: num(e.target.value) })} /></label>
                 <label className="text-xs text-muted">Kimi K3 (tareas)<input className="input mt-1" inputMode="numeric" value={fmt(cap.kimi)} onChange={(e) => setCap({ ...cap, kimi: num(e.target.value) })} /></label></div></fieldset>
-            <fieldset><legend className="mb-3 text-sm font-bold">Costo por tarea (USD)</legend>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="text-xs text-muted">GPT-5.5<input className="input mt-1" inputMode="decimal" defaultValue={cost.gpt} onChange={(e) => setCost({ ...cost, gpt: dec(e.target.value) })} /></label>
-                <label className="text-xs text-muted">Kimi K3<input className="input mt-1" inputMode="decimal" defaultValue={cost.kimi} onChange={(e) => setCost({ ...cost, kimi: dec(e.target.value) })} /></label></div></fieldset>
+            <fieldset><legend className="mb-3 text-sm font-bold">Precio por millón de tokens (USD)</legend>
+              <div className="grid gap-4 sm:grid-cols-4">
+                {([["gpt", "in", "GPT-5.5 entrada"], ["gpt", "out", "GPT-5.5 salida"], ["kimi", "in", "Kimi K3 entrada"], ["kimi", "out", "Kimi K3 salida"]] as const).map(([m, k, l]) => (
+                  <label key={l} className="text-xs text-muted">{l}<input className="input mt-1" inputMode="decimal" defaultValue={prices[m][k]} onChange={(e) => setPrices({ ...prices, [m]: { ...prices[m], [k]: dec(e.target.value) } })} /></label>))}</div>
+              <p className="mt-2 text-[11px] text-muted">El costo por tarea se calcula con los tokens estimados de cada actividad (ver Metodología).</p></fieldset>
             <fieldset><legend className="mb-3 text-sm font-bold">Productividad por actividad</legend>
               <div className="grid gap-4 sm:grid-cols-3">
                 <label className="text-xs text-muted">Actividad<select className="input mt-1" value={sel} onChange={(e) => setSel(e.target.value)}>{acts.map((a) => <option key={a.id} value={a.id}>{a.short}</option>)}</select></label>
@@ -123,9 +124,9 @@ export default function Simulator() {
                 <div key={l} className="card !p-4"><p className="text-[11px] text-muted">{l}</p><p className={`mt-1 text-xl font-extrabold ${c}`}>{v}</p></div>))}
             </div>
             <div className="mt-5 grid gap-5 lg:grid-cols-3">
-              <div className="card lg:row-span-2"><h3 className="mb-4 text-sm font-bold">Distribución GPT-5.5 vs Kimi K3</h3><DistributionChart r={ok} /></div>
-              <div className="card"><h3 className="mb-4 text-sm font-bold">Costo por modelo vs presupuesto máximo</h3><CostChart r={ok} /></div>
-              <div className="card"><h3 className="mb-4 text-sm font-bold">Capacidad utilizada</h3><CapacityChart r={ok} />
+              <div className="card lg:row-span-2"><h3 className="mb-4 text-sm font-bold">Distribución GPT-5.5 vs Kimi K3</h3><div className="relative h-[340px]"><DistributionChart r={ok} /></div></div>
+              <div className="card"><h3 className="mb-4 text-sm font-bold">Costo por modelo vs presupuesto máximo</h3><div className="relative h-[220px]"><CostChart r={ok} /></div></div>
+              <div className="card"><h3 className="mb-4 text-sm font-bold">Capacidad utilizada</h3><div className="relative h-[140px]"><CapacityChart r={ok} /></div>
                 <p className="mt-3 text-[11px] text-muted">GPT-5.5 · {Math.round((ok.capacity!.gpt.used / ok.capacity!.gpt.available) * 100)}% usada · Kimi K3 · {Math.round((ok.capacity!.kimi.used / ok.capacity!.kimi.available) * 100)}% usada</p></div>
             </div>
             <div className="card mt-5 overflow-x-auto !p-0">

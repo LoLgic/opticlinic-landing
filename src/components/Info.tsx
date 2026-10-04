@@ -1,4 +1,4 @@
-import { ACTIVITIES, HOW_STEPS, MODEL_ROWS, PROBLEM_CHIPS, PROBLEM_STEPS } from "../data";
+import { ACTIVITIES, DEFAULT_CAPACITY, HOW_STEPS, MODEL_ROWS, PRICES, PROBLEM_CHIPS, PROBLEM_STEPS, avgProd } from "../data";
 import { Arrow, Demo, Head, SplitBar } from "./ui";
 
 export function Problem() {
@@ -33,15 +33,26 @@ export function How() {
   );
 }
 
+const facts = (j: 0 | 1): Record<string, string> => {
+  const p = j === 0 ? PRICES.gpt : PRICES.kimi;
+  return {
+    Productividad: avgProd(j).toFixed(2),
+    Costo: `$${p.in} / $${p.out} por M tokens`,
+    Capacidad: `${(j === 0 ? DEFAULT_CAPACITY.gpt : DEFAULT_CAPACITY.kimi).toLocaleString("es-CO")} tareas/mes`,
+    Tiempo: "Por medir",
+    "Actividades asignadas": "Las define el solver",
+  };
+};
+
 export function Models() {
   return (
     <section id="modelos" className="section">
       <Head tag="Modelos de IA" title="GPT-5.5 y Kimi K3" text="Cada modelo aporta condiciones distintas según la actividad." />
       <div className="grid gap-5 md:grid-cols-2">
-        {[["GPT-5.5", "bg-brand"], ["Kimi K3", "bg-cyan2"]].map(([n, bg]) => (
+        {[["GPT-5.5", "bg-brand", 0], ["Kimi K3", "bg-cyan2", 1]].map(([n, bg, j]) => (
           <article key={n} className="card !p-6">
-            <header className="mb-6 flex items-center gap-3"><span className={`grid h-10 w-10 place-items-center rounded-xl text-xs font-bold text-white ${bg}`}>AI</span><h3 className="text-2xl font-extrabold">{n}</h3><Demo /></header>
-            <dl className="divide-y divide-line">{MODEL_ROWS.map((r) => <div key={r} className="flex justify-between py-4 text-sm"><dt className="text-muted">{r}</dt><dd className="font-extrabold">XX</dd></div>)}</dl>
+            <header className="mb-6 flex items-center gap-3"><span className={`grid h-10 w-10 place-items-center rounded-xl text-xs font-bold text-white ${bg}`}>AI</span><h3 className="text-2xl font-extrabold">{n}</h3><Demo>Supuestos</Demo></header>
+            <dl className="divide-y divide-line">{MODEL_ROWS.map((r) => <div key={r} className="flex justify-between py-4 text-sm"><dt className="text-muted">{r}</dt><dd className="font-extrabold">{facts(j as 0 | 1)[r]}</dd></div>)}</dl>
           </article>
         ))}
       </div>
