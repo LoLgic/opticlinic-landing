@@ -24,3 +24,11 @@ body { @apply font-sans text-ink bg-bg antialiased; }
   .num { @apply text-2xl font-extrabold text-cyan2; }
   .input { @apply w-full rounded-xl border border-line bg-card px-3 py-3 text-sm font-semibold text-ink outline-none focus:border-brand focus:ring-1 focus:ring-brand; }
 }
+
+/* "Guardar como PDF": imprime solo el dashboard, siempre en tema claro */
+@media print {
+  :root, :root.dark { --bg: 255 255 255; --surface: 244 248 252; --card: 255 255 255; --chip: 236 241 249; --line: 226 232 240; --ink: 11 27 58; --muted: 91 107 130; --brand: 11 78 162; --cyan: 6 168 204; }
+  header, footer, .no-print, main > section:not(#resultados) { display: none !important; }
+  .card, canvas { break-inside: avoid; }
+  @page { margin: 12mm; }
+}

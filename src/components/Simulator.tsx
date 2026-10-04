@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { optimize, type OptimizeResult } from "../api";
 import { ACTIVITIES, DEFAULT_BUDGET, DEFAULT_CAPACITY, DEFAULT_PROD, PRICES, STAGES, taskCost } from "../data";
 import { CapacityChart, CostChart, DistributionChart, SensitivityChart } from "./Charts";
+import { downloadCsv } from "../export";
 import { useLastResult } from "../ResultContext";
 import { Demo, Head } from "./ui";
 
@@ -120,7 +121,12 @@ export default function Simulator() {
           <div className="card text-center text-sm text-muted">Ejecuta la optimización en el simulador para ver aquí la distribución, los costos y la capacidad utilizada.</div>
         ) : (
           <>
-            <div className="mb-5"><Demo>Escenario académico · parámetros editables</Demo></div>
+            <div className="no-print mb-5 flex flex-wrap items-center gap-3">
+              <Demo>Escenario académico · parámetros editables</Demo>
+              <span className="flex-1" />
+              <button className="btn btn-secondary !px-4 !py-2" onClick={() => downloadCsv(ok)}>Descargar CSV</button>
+              <button className="btn btn-secondary !px-4 !py-2" onClick={() => window.print()}>Guardar como PDF</button>
+            </div>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
               {[["Demanda cubierta", `${Math.round(t!.demand_covered_pct)}%`, "text-ok"], ["Presupuesto utilizado", usd(t!.cost), ""], ["Productividad total", fmt(t!.productivity), ""],
                 ["Capacidad utilizada", `${capPct}%`, "text-brand"], ["Costo total", usd(t!.cost), ""], ["Estado", "Solución factible", "text-ok"]].map(([l, v, c]) => (
