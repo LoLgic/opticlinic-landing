@@ -1,4 +1,5 @@
 import { ACTIVITIES, DEFAULT_CAPACITY, HOW_STEPS, MODEL_ROWS, PRICES, PROBLEM_CHIPS, PROBLEM_STEPS, avgProd } from "../data";
+import { useLastResult } from "../ResultContext";
 import { Arrow, Demo, Head, SplitBar } from "./ui";
 
 export function Problem() {
@@ -61,21 +62,32 @@ export function Models() {
   );
 }
 
+const lead = (pct: number) => (pct >= 65 ? "GPT-5.5" : pct <= 35 ? "Kimi K3" : "Mixta");
+
 export function Activities() {
+  const { last } = useLastResult();
+  const alloc = Object.fromEntries((last?.allocations ?? []).map((a) => [a.id, a]));
   return (
     <section className="bg-surface"><div className="section">
-      <Head tag="Actividades" title="Siete actividades, una distribución óptima" text="Escenario académico · porcentajes de ejemplo." />
+      <Head tag="Actividades" title="Siete actividades, una distribución óptima"
+        text={last ? "Resultado del solver para el último escenario ejecutado en el simulador." : "Escenario académico · porcentajes de ejemplo. Ejecuta el simulador para ver la distribución real."} />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {ACTIVITIES.map((a) => (
-          <article key={a.id} className="card">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-chip text-lg">{a.icon}</span>
-            <h3 className="mt-4 font-bold">{a.name}</h3>
-            <p className="mt-2 text-xs text-muted">Demanda: {a.demand ? a.demand.toLocaleString("es-CO") : "Por definir"}</p>
-            <p className={`mt-1 text-xs font-bold ${a.lead === "Kimi K3" ? "text-cyan2" : "text-brand"}`}>IA principal (demo): {a.lead}</p>
-            <div className="my-2"><SplitBar pct={a.pct} label={`${a.pct}% GPT-5.5`} /></div>
-            <p className="text-[11px] text-muted">{a.pct}% GPT-5.5 / {100 - a.pct}% Kimi K3</p>
-          </article>
-        ))}
+        {ACTIVITIES.map((a) => {
+          const r = alloc[a.id];
+          const pct = r ? Math.round((r.gpt / r.demand) * 100) : a.pct;
+          const demand = r ? r.demand : a.demand;
+          const l = r ? lead(pct) : a.lead;
+          return (
+            <article key={a.id} className="card">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-chip text-lg">{a.icon}</span>
+              <h3 className="mt-4 font-bold">{a.name}</h3>
+              <p className="mt-2 text-xs text-muted">Demanda: {demand ? demand.toLocaleString("es-CO") : "Por definir"}</p>
+              <p className={`mt-1 text-xs font-bold ${l === "Kimi K3" ? "text-cyan2" : "text-brand"}`}>IA principal{r ? "" : " (demo)"}: {l}</p>
+              <div className="my-2"><SplitBar pct={pct} label={`${pct}% GPT-5.5`} /></div>
+              <p className="text-[11px] text-muted">{pct}% GPT-5.5 / {100 - pct}% Kimi K3</p>
+              {r && <p className="mt-1 text-[11px] text-muted">Costo mensual: ${Math.round(r.cost).toLocaleString("es-CO")}</p>}
+            </article>);
+        })}
       </div>
     </div></section>
   );

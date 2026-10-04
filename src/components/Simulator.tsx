@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { optimize, type OptimizeResult } from "../api";
 import { ACTIVITIES, DEFAULT_BUDGET, DEFAULT_CAPACITY, DEFAULT_PROD, PRICES, STAGES, taskCost } from "../data";
 import { CapacityChart, CostChart, DistributionChart, SensitivityChart } from "./Charts";
+import { useLastResult } from "../ResultContext";
 import { Demo, Head } from "./ui";
 
 const fmt = (n: number) => Math.round(n).toLocaleString("es-CO");
@@ -23,6 +24,8 @@ export default function Simulator() {
   const [result, setResult] = useState<OptimizeResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const abort = useRef<AbortController | null>(null);
+  const { setLast } = useLastResult();
+  useEffect(() => { if (stage >= LAST && result?.feasible) setLast(result); }, [stage, result, setLast]);
 
   // Animación de etapas: avanza hasta la 5; la última espera a la respuesta del API
   useEffect(() => {

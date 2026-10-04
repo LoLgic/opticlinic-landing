@@ -4,15 +4,16 @@ import { Problem, How, Models, Activities } from "./components/Info";
 import Simulator from "./components/Simulator";
 import { MathModel, Methodology, Project, Footer } from "./components/Final";
 import Assumptions from "./components/Assumptions";
+import { ResultProvider } from "./ResultContext";
 
 export default function App() {
   return (
-    <>
+    <ResultProvider>
       <Navbar />
       <main>
         <Hero /><Problem /><How /><Models /><Activities /><Simulator /><MathModel /><Methodology /><Assumptions /><Project />
       </main>
       <Footer />
-    </>
+    </ResultProvider>
   );
 }
