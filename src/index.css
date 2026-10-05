@@ -4,11 +4,11 @@
 
 :root {
   --bg: 255 255 255; --surface: 244 248 252; --card: 255 255 255; --chip: 236 241 249; --line: 226 232 240;
-  --ink: 11 27 58; --muted: 91 107 130; --brand: 11 78 162; --cyan: 6 168 204; --ok: 18 161 80; --warn: 245 124 0;
+  --ink: 11 27 58; --muted: 91 107 130; --brand: 11 78 162; --cyan: 0 122 153; --ok: 15 118 58; --warn: 180 78 0;
 }
 :root.dark {
   --bg: 8 15 30; --surface: 11 22 41; --card: 15 28 52; --chip: 22 38 68; --line: 32 48 76;
-  --ink: 232 238 248; --muted: 148 163 184; --brand: 59 130 246; --cyan: 34 190 222;
+  --ink: 232 238 248; --muted: 148 163 184; --brand: 59 130 246; --cyan: 34 190 222; --ok: 74 222 128; --warn: 251 146 60;
 }
 html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
 body { @apply font-sans text-ink bg-bg antialiased; }
@@ -31,4 +31,11 @@ body { @apply font-sans text-ink bg-bg antialiased; }
   header, footer, .no-print, main > section:not(#resultados) { display: none !important; }
   .card, canvas { break-inside: avoid; }
   @page { margin: 12mm; }
+}
+
+/* Accesibilidad: foco visible en todo elemento interactivo y respeto a "reducir movimiento" */
+a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid rgb(var(--brand)); outline-offset: 2px; border-radius: 6px; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }

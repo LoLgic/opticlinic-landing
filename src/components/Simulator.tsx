@@ -24,6 +24,7 @@ export default function Simulator() {
   const [stage, setStage] = useState(-1); // -1 inactivo · 0..5 en curso · 6 completado
   const [result, setResult] = useState<OptimizeResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [slow, setSlow] = useState(false); // el servidor gratuito puede tardar ~1 min en despertar
   const abort = useRef<AbortController | null>(null);
   const { setLast } = useLastResult();
   useEffect(() => { if (stage >= LAST && result?.feasible) setLast(result); }, [stage, result, setLast]);
@@ -40,7 +41,8 @@ export default function Simulator() {
     e.preventDefault();
     abort.current?.abort();
     abort.current = new AbortController();
-    setResult(null); setError(null); setStage(0);
+    setResult(null); setError(null); setStage(0); setSlow(false);
+    const timer = setTimeout(() => setSlow(true), 6000);
     try {
       const r = await optimize({
         activities: acts.map((a) => ({ id: a.id, demand: demand[a.id], prod_gpt: prod[a.id][0], prod_kimi: prod[a.id][1], cost_gpt: taskCost(a.id, prices)[0], cost_kimi: taskCost(a.id, prices)[1] })),
@@ -51,6 +53,8 @@ export default function Simulator() {
       if ((err as Error).name === "AbortError") return;
       setStage(-1);
       setError(err instanceof TypeError ? "No se pudo conectar con el servidor. ¿Está corriendo FastAPI en el puerto 8000?" : (err as Error).message);
+    } finally {
+      clearTimeout(timer); setSlow(false);
     }
   }
 
@@ -92,7 +96,7 @@ export default function Simulator() {
           </form>
 
           <aside className="card h-fit !p-6">
-            <span className="inline-block rounded-xl bg-chip px-3 py-2 text-[11px] font-bold text-ok">Estado: {status}</span>
+            <span role="status" className="inline-block rounded-xl bg-chip px-3 py-2 text-[11px] font-bold text-ok">Estado: {status}</span>
             <h3 className="mb-3 mt-5 text-sm font-bold">Vista previa del modelo</h3>
             <ul className="space-y-3">{FORMULAS.map((f) => <li key={f} className="rounded-xl bg-chip px-4 py-4 text-sm font-bold text-brand">{f}</li>)}</ul>
             <div className="mt-3 rounded-xl bg-chip p-4"><p className="text-sm font-bold">{done ? (result.feasible ? "Resultados listos" : "Sin solución factible") : "Sin resultados todavía"}</p>
@@ -106,7 +110,8 @@ export default function Simulator() {
             <h3 className="mt-4 text-2xl font-extrabold">Analizando {acts.length} actividades…</h3>
             <div className="card mt-4 !p-6">
               <p className="text-xs font-bold text-muted">Progreso: {Math.min(stage, LAST)} de {LAST} etapas</p>
-              <div className="my-3 h-1.5 rounded-full bg-chip"><div className="h-full rounded-full bg-cyan2 transition-all" style={{ width: `${(Math.min(stage, LAST) / LAST) * 100}%` }} /></div>
+              {slow && !done && <p role="status" className="mt-2 text-xs font-semibold text-warn">El servidor gratuito estaba en reposo y está despertando; puede tardar hasta un minuto.</p>}
+              <div className="my-3 h-1.5 rounded-full bg-chip" role="progressbar" aria-label="Progreso de la optimización" aria-valuemin={0} aria-valuemax={LAST} aria-valuenow={Math.min(stage, LAST)}><div className="h-full rounded-full bg-cyan2 transition-all" style={{ width: `${(Math.min(stage, LAST) / LAST) * 100}%` }} /></div>
               <ul className="space-y-3 text-sm">{STAGES.map((s, i) => (
                 <li key={s} className={i <= stage ? "font-bold" : "text-muted"}><span className={`mr-3 ${i < stage ? "text-ok" : "text-cyan2"}`}>{i < stage ? "✓" : i === stage ? "●" : "○"}</span>{s}</li>))}</ul>
             </div>
@@ -161,9 +166,10 @@ export default function Simulator() {
             })()}
             <div className="card mt-5 overflow-x-auto !p-0">
               <table className="w-full min-w-[560px] text-left text-sm">
-                <thead className="text-xs text-muted"><tr>{["Actividad", "GPT-5.5", "Kimi K3", "Demanda", "Costo"].map((h) => <th key={h} className="px-5 py-4 font-bold">{h}</th>)}</tr></thead>
+                <caption className="sr-only">Tareas asignadas a cada modelo por actividad, con demanda y costo mensual</caption>
+                <thead className="text-xs text-muted"><tr>{["Actividad", "GPT-5.5", "Kimi K3", "Demanda", "Costo"].map((h) => <th scope="col" key={h} className="px-5 py-4 font-bold">{h}</th>)}</tr></thead>
                 <tbody>{ok.allocations!.map((r, i) => (
-                  <tr key={r.id} className={i % 2 === 0 ? "bg-chip/60" : ""}><td className="px-5 py-4 font-bold">{ACTIVITIES.find((a) => a.id === r.id)?.short}</td><td className="px-5 font-bold">{fmt(r.gpt)}</td><td className="px-5 font-bold">{fmt(r.kimi)}</td>
+                  <tr key={r.id} className={i % 2 === 0 ? "bg-chip/60" : ""}><th scope="row" className="px-5 py-4 text-left font-bold">{ACTIVITIES.find((a) => a.id === r.id)?.short}</th><td className="px-5 font-bold">{fmt(r.gpt)}</td><td className="px-5 font-bold">{fmt(r.kimi)}</td>
                     <td className="px-5 text-muted">{fmt(r.demand)}</td><td className="px-5 text-muted">{usd(r.cost)}</td></tr>))}</tbody>
               </table></div>
             <div className="mt-5 rounded-2xl bg-chip p-6">

@@ -9,8 +9,9 @@ import { ResultProvider } from "./ResultContext";
 export default function App() {
   return (
     <ResultProvider>
+      <a href="#contenido" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-brand focus:px-4 focus:py-2 focus:text-white">Saltar al contenido</a>
       <Navbar />
-      <main>
+      <main id="contenido" tabIndex={-1} className="outline-none">
         <Hero /><Problem /><How /><Models /><Activities /><Simulator /><MathModel /><Methodology /><Assumptions /><Project />
       </main>
       <Footer />

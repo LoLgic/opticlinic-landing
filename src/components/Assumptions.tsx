@@ -10,12 +10,13 @@ export default function Assumptions() {
         text="Los precios son de lista; los tokens y la productividad son supuestos razonados del escenario académico, no mediciones." />
       <div className="card overflow-x-auto !p-0">
         <table className="w-full min-w-[820px] text-left text-sm">
-          <thead className="text-xs text-muted"><tr>{["Actividad", "Tokens (ent. / sal.)", "Costo GPT-5.5", "Costo Kimi K3", "Productividad (GPT / Kimi)", "Justificación"].map((h) => <th key={h} className="px-4 py-4 font-bold">{h}</th>)}</tr></thead>
+          <caption className="sr-only">Supuestos por actividad: tokens, costo por tarea, productividad y justificación</caption>
+          <thead className="text-xs text-muted"><tr>{["Actividad", "Tokens (ent. / sal.)", "Costo GPT-5.5", "Costo Kimi K3", "Productividad (GPT / Kimi)", "Justificación"].map((h) => <th scope="col" key={h} className="px-4 py-4 font-bold">{h}</th>)}</tr></thead>
           <tbody>{ACTIVITIES.map((a, i) => {
             const [cg, ck] = taskCost(a.id, PRICES), [pg, pk] = DEFAULT_PROD[a.id];
             return (
               <tr key={a.id} className={i % 2 === 0 ? "bg-chip/60" : ""}>
-                <td className="px-4 py-3 font-bold">{a.short}</td><td className="px-4">{TOKENS[a.id][0].toLocaleString("es-CO")} / {TOKENS[a.id][1].toLocaleString("es-CO")}</td>
+                <th scope="row" className="px-4 py-3 text-left font-bold">{a.short}</th><td className="px-4">{TOKENS[a.id][0].toLocaleString("es-CO")} / {TOKENS[a.id][1].toLocaleString("es-CO")}</td>
                 <td className="px-4">{usd4(cg)}</td><td className="px-4">{usd4(ck)}</td><td className="px-4 font-bold">{pg.toFixed(2)} / {pk.toFixed(2)}</td>
                 <td className="px-4 py-3 text-xs text-muted">{RATIONALE[a.id]}</td>
               </tr>);
