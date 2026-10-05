@@ -20,3 +20,6 @@ Producción: define `VITE_API_URL` (frontend) y `CORS_ORIGINS` (backend).
     docker compose down              # detener
 
 El frontend se sirve con nginx, que reenvía `/api` al backend dentro de la red de Docker (no hace falta CORS).
+
+## CI
+`.github/workflows/ci.yml` corre en cada push y pull request: pruebas del backend (pytest), pruebas y build del frontend (Vitest + tsc + Vite) y construcción de las imágenes Docker. Sube también `package-lock.json` al repositorio.
