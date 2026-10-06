@@ -1,5 +1,5 @@
 # Blueprint de Render: crea el backend (Docker) y el frontend (sitio estático) desde este repositorio.
-# Si Render cambia los nombres por estar ocupados, actualiza CORS_ORIGINS y VITE_API_URL con las URLs reales.
+# URLs reales del despliegue: web https://opticlinic-web.onrender.com y API https://opticlinic-api-lz50.onrender.com
 services:
   - type: web
     name: opticlinic-api

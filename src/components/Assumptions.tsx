@@ -1,4 +1,4 @@
-import { ACTIVITIES, DEFAULT_BUDGET, DEFAULT_CAPACITY, DEFAULT_PROD, KIMI_OUT_FACTOR, PRICES, RATIONALE, TOKENS, taskCost } from "../data";
+import { ACTIVITIES, DEFAULT_BUDGET, DEFAULT_CAPACITY, DEFAULT_PROD, GPT_OUT_FACTOR, KIMI_OUT_FACTOR, PRICES, RATIONALE, TOKENS, taskCost } from "../data";
 import { Head } from "./ui";
 
 const usd4 = (n: number) => `$${n.toFixed(4)}`;
@@ -11,7 +11,7 @@ export default function Assumptions() {
       <div className="card overflow-x-auto !p-0">
         <table className="w-full min-w-[820px] text-left text-sm">
           <caption className="sr-only">Supuestos por actividad: tokens, costo por tarea, productividad y justificación</caption>
-          <thead className="text-xs text-muted"><tr>{["Actividad", "Tokens (ent. / sal.)", "Costo GPT-5.5", "Costo Kimi K3", "Productividad (GPT / Kimi)", "Justificación"].map((h) => <th scope="col" key={h} className="px-4 py-4 font-bold">{h}</th>)}</tr></thead>
+          <thead className="text-xs text-muted"><tr>{["Actividad", "Tokens (ent. / sal.)", "Costo GPT-6 Astra", "Costo Kimi K3", "Productividad (GPT / Kimi)", "Justificación"].map((h) => <th scope="col" key={h} className="px-4 py-4 font-bold">{h}</th>)}</tr></thead>
           <tbody>{ACTIVITIES.map((a, i) => {
             const [cg, ck] = taskCost(a.id, PRICES), [pg, pk] = DEFAULT_PROD[a.id];
             return (
@@ -24,9 +24,9 @@ export default function Assumptions() {
         </table>
       </div>
       <ul className="mt-6 grid list-disc gap-3 pl-5 text-sm text-muted md:grid-cols-2">
-        <li><b className="text-ink">Precios:</b> GPT-5.5 ${PRICES.gpt.in} entrada / ${PRICES.gpt.out} salida y Kimi K3 ${PRICES.kimi.in} / ${PRICES.kimi.out} por millón de tokens (precios de lista consultados en octubre de 2026; verificar en las páginas oficiales de OpenAI y Moonshot AI).</li>
+        <li><b className="text-ink">Precios:</b> GPT-6 Astra ${PRICES.gpt.in} entrada / ${PRICES.gpt.out} salida y Kimi K3 ${PRICES.kimi.in} / ${PRICES.kimi.out} por millón de tokens (precios de lista de GPT-6 Astra en contexto corto (hasta 272.000 tokens de entrada; todas las tareas del modelo están muy por debajo) y de Kimi K3, tomados de las tablas oficiales de OpenAI y Moonshot AI).</li>
         <li><b className="text-ink">Costo por tarea</b> = (tokens de entrada × precio de entrada + tokens de salida × precio de salida) / 1.000.000.</li>
-        <li><b className="text-ink">Razonamiento de Kimi K3:</b> sus tokens de razonamiento se facturan como salida, por eso se asume {KIMI_OUT_FACTOR}× los tokens de salida visibles.</li>
+        <li><b className="text-ink">Razonamiento de Kimi K3:</b> sus tokens de razonamiento se facturan como salida, por eso se asume {KIMI_OUT_FACTOR}× los tokens de salida visibles. Para GPT-6 Astra se asume esfuerzo de razonamiento bajo ({GPT_OUT_FACTOR}×); con esfuerzo alto el factor sube.</li>
         <li><b className="text-ink">Tokens por tarea:</b> estimaciones según el tipo de actividad (contexto del paciente o registro + respuesta); no fueron medidos.</li>
         <li><b className="text-ink">Productividad:</b> calidad esperada por tarea en escala 0–1, asignada por criterio razonado de los autores; es el supuesto con mayor incertidumbre.</li>
         <li><b className="text-ink">Demanda, presupuesto y capacidad:</b> hipotéticos (demanda mensual del PDF, presupuesto de ${DEFAULT_BUDGET} USD y capacidad de {DEFAULT_CAPACITY.gpt.toLocaleString("es-CO")} y {DEFAULT_CAPACITY.kimi.toLocaleString("es-CO")} tareas/mes).</li>

@@ -79,17 +79,17 @@ export default function Simulator() {
                 <input className="input mt-1" inputMode="numeric" value={`$ ${fmt(budget)}`} onChange={(e) => setBudget(num(e.target.value))} /></label></fieldset>
             <fieldset><legend className="mb-3 text-sm font-bold">Capacidad</legend>
               <div className="grid gap-4 sm:grid-cols-2">
-                <label className="text-xs text-muted">GPT-5.5 (tareas)<input className="input mt-1" inputMode="numeric" value={fmt(cap.gpt)} onChange={(e) => setCap({ ...cap, gpt: num(e.target.value) })} /></label>
+                <label className="text-xs text-muted">GPT-6 Astra (tareas)<input className="input mt-1" inputMode="numeric" value={fmt(cap.gpt)} onChange={(e) => setCap({ ...cap, gpt: num(e.target.value) })} /></label>
                 <label className="text-xs text-muted">Kimi K3 (tareas)<input className="input mt-1" inputMode="numeric" value={fmt(cap.kimi)} onChange={(e) => setCap({ ...cap, kimi: num(e.target.value) })} /></label></div></fieldset>
             <fieldset><legend className="mb-3 text-sm font-bold">Precio por millón de tokens (USD)</legend>
               <div className="grid gap-4 sm:grid-cols-4">
-                {([["gpt", "in", "GPT-5.5 entrada"], ["gpt", "out", "GPT-5.5 salida"], ["kimi", "in", "Kimi K3 entrada"], ["kimi", "out", "Kimi K3 salida"]] as const).map(([m, k, l]) => (
+                {([["gpt", "in", "GPT-6 Astra entrada"], ["gpt", "out", "GPT-6 Astra salida"], ["kimi", "in", "Kimi K3 entrada"], ["kimi", "out", "Kimi K3 salida"]] as const).map(([m, k, l]) => (
                   <label key={l} className="text-xs text-muted">{l}<input className="input mt-1" inputMode="decimal" defaultValue={prices[m][k]} onChange={(e) => setPrices({ ...prices, [m]: { ...prices[m], [k]: dec(e.target.value) } })} /></label>))}</div>
               <p className="mt-2 text-[11px] text-muted">El costo por tarea se calcula con los tokens estimados de cada actividad (ver Metodología).</p></fieldset>
             <fieldset><legend className="mb-3 text-sm font-bold">Productividad por actividad</legend>
               <div className="grid gap-4 sm:grid-cols-3">
                 <label className="text-xs text-muted">Actividad<select className="input mt-1" value={sel} onChange={(e) => setSel(e.target.value)}>{acts.map((a) => <option key={a.id} value={a.id}>{a.short}</option>)}</select></label>
-                <label className="text-xs text-muted">GPT-5.5<input key={sel + "g"} className="input mt-1" inputMode="decimal" defaultValue={prod[sel][0]} onChange={(e) => setProd({ ...prod, [sel]: [dec(e.target.value), prod[sel][1]] })} /></label>
+                <label className="text-xs text-muted">GPT-6 Astra<input key={sel + "g"} className="input mt-1" inputMode="decimal" defaultValue={prod[sel][0]} onChange={(e) => setProd({ ...prod, [sel]: [dec(e.target.value), prod[sel][1]] })} /></label>
                 <label className="text-xs text-muted">Kimi K3<input key={sel + "k"} className="input mt-1" inputMode="decimal" defaultValue={prod[sel][1]} onChange={(e) => setProd({ ...prod, [sel]: [prod[sel][0], dec(e.target.value)] })} /></label></div></fieldset>
             <button className="btn btn-primary w-full !py-5" disabled={stage >= 0 && !done}>{stage >= 0 && !done ? "Optimizando…" : "Ejecutar optimización"}</button>
             {error && <p role="alert" className="rounded-xl bg-warn/10 px-4 py-3 text-sm font-semibold text-warn">{error}</p>}
@@ -138,18 +138,18 @@ export default function Simulator() {
                 <div key={l} className="card !p-4"><p className="text-[11px] text-muted">{l}</p><p className={`mt-1 text-xl font-extrabold ${c}`}>{v}</p></div>))}
             </div>
             <div className="mt-5 grid gap-5 lg:grid-cols-3">
-              <div className="card lg:row-span-2"><h3 className="mb-4 text-sm font-bold">Distribución GPT-5.5 vs Kimi K3</h3><div className="relative h-[340px]"><DistributionChart r={ok} /></div></div>
+              <div className="card lg:row-span-2"><h3 className="mb-4 text-sm font-bold">Distribución GPT-6 Astra vs Kimi K3</h3><div className="relative h-[340px]"><DistributionChart r={ok} /></div></div>
               <div className="card"><h3 className="mb-4 text-sm font-bold">Costo por modelo vs presupuesto máximo</h3><div className="relative h-[220px]"><CostChart r={ok} /></div></div>
               <div className="card"><h3 className="mb-4 text-sm font-bold">Capacidad utilizada</h3><div className="relative h-[140px]"><CapacityChart r={ok} /></div>
-                <p className="mt-3 text-[11px] text-muted">GPT-5.5 · {Math.round((ok.capacity!.gpt.used / ok.capacity!.gpt.available) * 100)}% usada · Kimi K3 · {Math.round((ok.capacity!.kimi.used / ok.capacity!.kimi.available) * 100)}% usada</p></div>
+                <p className="mt-3 text-[11px] text-muted">GPT-6 Astra · {Math.round((ok.capacity!.gpt.used / ok.capacity!.gpt.available) * 100)}% usada · Kimi K3 · {Math.round((ok.capacity!.kimi.used / ok.capacity!.kimi.available) * 100)}% usada</p></div>
             </div>
             {ok.sensitivity && (() => {
               const se = ok.sensitivity!, sh = se.shadow, sl = se.slack;
               const items = [
                 sh.budget > 1e-9 ? `Presupuesto agotado: cada USD adicional aumenta la productividad en ${sh.budget.toFixed(2)} unidades (+100 USD ≈ +${fmt(sh.budget * 100)}).`
                   : `El presupuesto no limita la solución: sobran ${usd(sl.budget)}.`,
-                sh.capacity_gpt > 1e-9 ? `La capacidad de GPT-5.5 es una restricción activa: cada tarea adicional suma ${sh.capacity_gpt.toFixed(3)} de productividad.`
-                  : `Capacidad de GPT-5.5 con holgura de ${fmt(sl.capacity_gpt)} tareas: ampliarla no mejora el resultado.`,
+                sh.capacity_gpt > 1e-9 ? `La capacidad de GPT-6 Astra es una restricción activa: cada tarea adicional suma ${sh.capacity_gpt.toFixed(3)} de productividad.`
+                  : `Capacidad de GPT-6 Astra con holgura de ${fmt(sl.capacity_gpt)} tareas: ampliarla no mejora el resultado.`,
                 sh.capacity_kimi > 1e-9 ? `La capacidad de Kimi K3 es una restricción activa: cada tarea adicional suma ${sh.capacity_kimi.toFixed(3)} de productividad.`
                   : `Capacidad de Kimi K3 con holgura de ${fmt(sl.capacity_kimi)} tareas: ampliarla no mejora el resultado.`,
                 se.current_budget >= se.saturation_budget - 0.01 ? "El presupuesto ya alcanzó el punto de saturación: más dinero no aumenta la productividad."
@@ -167,7 +167,7 @@ export default function Simulator() {
             <div className="card mt-5 overflow-x-auto !p-0">
               <table className="w-full min-w-[560px] text-left text-sm">
                 <caption className="sr-only">Tareas asignadas a cada modelo por actividad, con demanda y costo mensual</caption>
-                <thead className="text-xs text-muted"><tr>{["Actividad", "GPT-5.5", "Kimi K3", "Demanda", "Costo"].map((h) => <th scope="col" key={h} className="px-5 py-4 font-bold">{h}</th>)}</tr></thead>
+                <thead className="text-xs text-muted"><tr>{["Actividad", "GPT-6 Astra", "Kimi K3", "Demanda", "Costo"].map((h) => <th scope="col" key={h} className="px-5 py-4 font-bold">{h}</th>)}</tr></thead>
                 <tbody>{ok.allocations!.map((r, i) => (
                   <tr key={r.id} className={i % 2 === 0 ? "bg-chip/60" : ""}><th scope="row" className="px-5 py-4 text-left font-bold">{ACTIVITIES.find((a) => a.id === r.id)?.short}</th><td className="px-5 font-bold">{fmt(r.gpt)}</td><td className="px-5 font-bold">{fmt(r.kimi)}</td>
                     <td className="px-5 text-muted">{fmt(r.demand)}</td><td className="px-5 text-muted">{usd(r.cost)}</td></tr>))}</tbody>
@@ -175,7 +175,7 @@ export default function Simulator() {
             <div className="mt-5 rounded-2xl bg-chip p-6">
               <span className="text-[11px] font-bold text-ok">Solución encontrada</span>
               <h3 className="mt-2 text-2xl font-extrabold">Distribución óptima</h3>
-              <p className="mt-1 font-bold"><span className="mr-6 text-brand">GPT-5.5: {Math.round((t!.gpt / (t!.gpt + t!.kimi)) * 100)}%</span><span className="text-cyan2">Kimi K3: {Math.round((t!.kimi / (t!.gpt + t!.kimi)) * 100)}%</span></p>
+              <p className="mt-1 font-bold"><span className="mr-6 text-brand">GPT-6 Astra: {Math.round((t!.gpt / (t!.gpt + t!.kimi)) * 100)}%</span><span className="text-cyan2">Kimi K3: {Math.round((t!.kimi / (t!.gpt + t!.kimi)) * 100)}%</span></p>
               <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-5">
                 {[["Costo total", usd(t!.cost)], ["Productividad", fmt(t!.productivity)], ["Demanda cubierta", `${Math.round(t!.demand_covered_pct)}%`], ["Capacidad utilizada", `${capPct}%`], ["Presupuesto restante", usd(t!.budget_remaining)]].map(([l, v]) => (
                   <div key={l} className="card !p-4"><p className="text-[11px] text-muted">{l}</p><p className="text-xl font-extrabold">{v}</p></div>))}</div>

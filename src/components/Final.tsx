@@ -18,7 +18,7 @@ export function MathModel() {
           <circle cx="314" cy="112" r="7" fill="rgb(var(--ok))" />
           <path d="M20 8V242H520" fill="none" stroke="rgb(var(--ink))" strokeWidth="1.5" />
           <g className="fill-muted text-[11px] font-semibold">
-            <text x="28" y="14">X2 (Kimi K3)</text><text x="400" y="262">X1 (GPT-5.5)</text>
+            <text x="28" y="14">X2 (Kimi K3)</text><text x="400" y="262">X1 (GPT-6 Astra)</text>
             <text x="400" y="32" fill="rgb(var(--warn))">Capacidad</text><text x="330" y="102" fill="rgb(var(--ok))">Solución óptima</text>
             <text x="360" y="200" fill="rgb(var(--cyan))">Presupuesto</text>
           </g>

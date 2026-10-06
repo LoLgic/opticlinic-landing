@@ -48,9 +48,9 @@ const facts = (j: 0 | 1): Record<string, string> => {
 export function Models() {
   return (
     <section id="modelos" className="section">
-      <Head tag="Modelos de IA" title="GPT-5.5 y Kimi K3" text="Cada modelo aporta condiciones distintas según la actividad." />
+      <Head tag="Modelos de IA" title="GPT-6 Astra y Kimi K3" text="Cada modelo aporta condiciones distintas según la actividad." />
       <div className="grid gap-5 md:grid-cols-2">
-        {[["GPT-5.5", "bg-brand", 0], ["Kimi K3", "bg-cyan2", 1]].map(([n, bg, j]) => (
+        {[["GPT-6 Astra", "bg-brand", 0], ["Kimi K3", "bg-cyan2", 1]].map(([n, bg, j]) => (
           <article key={n} className="card !p-6">
             <header className="mb-6 flex items-center gap-3"><span className={`grid h-10 w-10 place-items-center rounded-xl text-xs font-bold text-white ${bg}`}>AI</span><h3 className="text-2xl font-extrabold">{n}</h3><Demo>Supuestos</Demo></header>
             <dl className="divide-y divide-line">{MODEL_ROWS.map((r) => <div key={r} className="flex justify-between py-4 text-sm"><dt className="text-muted">{r}</dt><dd className="font-extrabold">{facts(j as 0 | 1)[r]}</dd></div>)}</dl>
@@ -62,7 +62,7 @@ export function Models() {
   );
 }
 
-const lead = (pct: number) => (pct >= 65 ? "GPT-5.5" : pct <= 35 ? "Kimi K3" : "Mixta");
+const lead = (pct: number) => (pct >= 65 ? "GPT-6 Astra" : pct <= 35 ? "Kimi K3" : "Mixta");
 
 export function Activities() {
   const { last } = useLastResult();
@@ -83,8 +83,8 @@ export function Activities() {
               <h3 className="mt-4 font-bold">{a.name}</h3>
               <p className="mt-2 text-xs text-muted">Demanda: {demand ? demand.toLocaleString("es-CO") : "Por definir"}</p>
               <p className={`mt-1 text-xs font-bold ${l === "Kimi K3" ? "text-cyan2" : "text-brand"}`}>IA principal{r ? "" : " (demo)"}: {l}</p>
-              <div className="my-2"><SplitBar pct={pct} label={`${pct}% GPT-5.5`} /></div>
-              <p className="text-[11px] text-muted">{pct}% GPT-5.5 / {100 - pct}% Kimi K3</p>
+              <div className="my-2"><SplitBar pct={pct} label={`${pct}% GPT-6 Astra`} /></div>
+              <p className="text-[11px] text-muted">{pct}% GPT-6 Astra / {100 - pct}% Kimi K3</p>
               {r && <p className="mt-1 text-[11px] text-muted">Costo mensual: ${Math.round(r.cost).toLocaleString("es-CO")}</p>}
             </article>);
         })}

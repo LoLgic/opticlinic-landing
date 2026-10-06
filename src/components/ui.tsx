@@ -15,7 +15,7 @@ export const Demo = ({ children = "Datos de demostración" }: { children?: React
   <span className="rounded-full bg-warn/10 px-2.5 py-1 text-[10px] font-semibold text-warn">{children}</span>
 );
 
-/** Barra de distribución: azul = GPT-5.5, cian = Kimi K3 */
+/** Barra de distribución: azul = GPT-6 Astra, cian = Kimi K3 */
 export function SplitBar({ pct, label }: { pct: number; label: string }) {
   return (
     <div className="flex h-2 overflow-hidden rounded-full bg-cyan2" role="img" aria-label={label}>

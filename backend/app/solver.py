@@ -1,6 +1,6 @@
 """Solver de Programación Lineal (sin dependencias de FastAPI, fácil de testear).
 
-Variables:  X[i][j] = tareas de la actividad i asignadas al modelo j (0 = GPT-5.5, 1 = Kimi K3)
+Variables:  X[i][j] = tareas de la actividad i asignadas al modelo j (0 = GPT-6 Astra, 1 = Kimi K3)
 Max Z  = Σ p_ij · X_ij
 s.a.    Σ c_ij · X_ij ≤ Presupuesto
         X_i0 + X_i1  = Demanda_i

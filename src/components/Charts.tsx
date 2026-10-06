@@ -16,10 +16,10 @@ const n = (v: number) => Math.round(v).toLocaleString("es-CO");
 export function DistributionChart({ r }: { r: OptimizeResult }) {
   const rows = r.allocations!;
   return (
-    <Bar role="img" aria-label="Gráfico de barras apiladas: porcentaje de cada actividad asignado a GPT-5.5 y a Kimi K3. Los valores exactos están en la tabla." options={{ indexAxis: "y", maintainAspectRatio: false, scales: { x: { stacked: true, max: 100, ticks: { callback: (v) => `${v}%` } }, y: { stacked: true, grid: { display: false } } },
+    <Bar role="img" aria-label="Gráfico de barras apiladas: porcentaje de cada actividad asignado a GPT-6 Astra y a Kimi K3. Los valores exactos están en la tabla." options={{ indexAxis: "y", maintainAspectRatio: false, scales: { x: { stacked: true, max: 100, ticks: { callback: (v) => `${v}%` } }, y: { stacked: true, grid: { display: false } } },
       plugins: { legend: { position: "bottom", labels: { boxWidth: 10 } }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${(c.raw as number).toFixed(0)}% (${n(rows[c.dataIndex][c.datasetIndex === 0 ? "gpt" : "kimi"])} tareas)` } } } }}
       data={{ labels: rows.map((a) => short(a.id)), datasets: [
-        { label: "GPT-5.5", data: rows.map((a) => (a.gpt / a.demand) * 100), backgroundColor: BLUE, borderRadius: 4 },
+        { label: "GPT-6 Astra", data: rows.map((a) => (a.gpt / a.demand) * 100), backgroundColor: BLUE, borderRadius: 4 },
         { label: "Kimi K3", data: rows.map((a) => (a.kimi / a.demand) * 100), backgroundColor: CYAN, borderRadius: 4 }] }} />
   );
 }
@@ -29,7 +29,7 @@ export function CostChart({ r }: { r: OptimizeResult }) {
   return (
     <Chart type="bar" role="img" aria-label="Gráfico de barras: costo mensual de cada modelo comparado con el presupuesto máximo." options={{ maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { callback: (v) => `$${n(Number(v))}` } }, x: { grid: { display: false } } },
       plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `$${n(c.raw as number)}` } } } }}
-      data={{ labels: ["GPT-5.5", "Kimi K3"], datasets: [
+      data={{ labels: ["GPT-6 Astra", "Kimi K3"], datasets: [
         { type: "bar", label: "Costo", data: [t.cost_gpt, t.cost_kimi], backgroundColor: [BLUE, CYAN], borderRadius: 8, maxBarThickness: 70 },
         { type: "line", label: "Presupuesto máximo", data: [r.budget!, r.budget!], borderColor: ORANGE, borderWidth: 2, pointRadius: 0 }] }} />
   );
@@ -40,7 +40,7 @@ export function CapacityChart({ r }: { r: OptimizeResult }) {
   return (
     <Bar role="img" aria-label="Gráfico de barras: capacidad usada y disponible de cada modelo." options={{ indexAxis: "y", maintainAspectRatio: false, scales: { x: { stacked: true, ticks: { callback: (v) => n(Number(v)) } }, y: { stacked: true, grid: { display: false } } },
       plugins: { legend: { position: "bottom", labels: { boxWidth: 10 } } } }}
-      data={{ labels: ["GPT-5.5", "Kimi K3"], datasets: [
+      data={{ labels: ["GPT-6 Astra", "Kimi K3"], datasets: [
         { label: "Usada", data: [c.gpt.used, c.kimi.used], backgroundColor: [BLUE, CYAN], borderRadius: 4 },
         { label: "Disponible", data: [c.gpt.available - c.gpt.used, c.kimi.available - c.kimi.used], backgroundColor: "rgba(138,155,181,.25)", borderRadius: 4 }] }} />
   );

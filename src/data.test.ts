@@ -4,7 +4,7 @@ import { ACTIVITIES, DEFAULT_PROD, PRICES, TOKENS, avgProd, taskCost } from "./d
 describe("parámetros del escenario", () => {
   it("calcula el costo por tarea con precios por millón de tokens", () => {
     const [gpt, kimi] = taskCost("consultas", PRICES); // 1200 ent. / 400 sal.
-    expect(gpt).toBeCloseTo(0.018, 6);
+    expect(gpt).toBeCloseTo(0.032, 6); // GPT-6 Astra: 1200 x $10/M + 400 x $50/M
     expect(kimi).toBeCloseTo(0.0126, 6); // salida de Kimi x1,5 por tokens de razonamiento
   });
 

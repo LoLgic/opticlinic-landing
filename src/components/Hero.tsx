@@ -34,11 +34,11 @@ export default function Hero() {
             <Kpi l="Capacidad usada" v={capUsed} c="text-brand" /><Kpi l="Estado" v="Factible" c="text-ok" />
           </div>
           <div className="mt-5 rounded-2xl bg-chip p-5">
-            <p className="mb-4 text-xs font-bold">Distribución GPT-5.5 vs Kimi K3{last ? "" : " (ejemplo)"}</p>
+            <p className="mb-4 text-xs font-bold">Distribución GPT-6 Astra vs Kimi K3{last ? "" : " (ejemplo)"}</p>
             <ul className="space-y-6">
               {rows.map((d) => (
                 <li key={d.id} className="grid grid-cols-[100px_1fr] items-center gap-4 text-[11px] text-muted">
-                  {d.short}<SplitBar pct={d.pct} label={`${d.short}: ${d.pct}% GPT-5.5`} />
+                  {d.short}<SplitBar pct={d.pct} label={`${d.short}: ${d.pct}% GPT-6 Astra`} />
                 </li>
               ))}
             </ul>
