@@ -21,4 +21,4 @@ services:
       - key: NODE_VERSION
         value: "20"
       - key: VITE_API_URL
-        value: https://opticlinic-api.onrender.com
+        value: https://opticlinic-api-lz50.onrender.com
